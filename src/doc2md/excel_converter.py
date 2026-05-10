@@ -14,6 +14,7 @@ class ExcelConverter:
             if df.empty:
                 parts.append(f"## {name}\n\n*(empty sheet)*\n")
                 continue
+            df = df.map(lambda x: str(x).replace('\n', '<br>') if isinstance(x, str) else x)
             md = df.to_markdown(index=False)
             parts.append(f"## {name}\n\n{md}\n")
         return ConvertResult(

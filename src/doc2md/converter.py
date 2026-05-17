@@ -11,12 +11,15 @@ class UnsupportedFormatError(ValueError):
     pass
 
 
-def convert(path: str, **kwargs) -> ConvertResult:
+def convert(path: str, engine: str = 'auto', **kwargs) -> ConvertResult:
     ext = Path(path).suffix.lower()
 
     if ext in {'.pdf'} | IMAGE_EXTENSIONS:
+        if engine == 'odl':
+            from doc2md.odl_converter import OdlConverter
+            return OdlConverter().convert(path)
         from doc2md.pdf_converter import PdfConverter
-        return PdfConverter(**kwargs).convert(path)
+        return PdfConverter(engine=engine, **kwargs).convert(path)
     elif ext in ('.docx', '.doc'):
         return WordConverter().convert(path)
     elif ext in ('.xlsx', '.xls'):

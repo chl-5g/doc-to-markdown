@@ -189,6 +189,7 @@ class PdfConverter:
             '-o', str(job_dir),
             '-b', 'hybrid-auto-engine',
             '-l', self.lang,
+            '--api-url', 'http://127.0.0.1:8777',
         ]
         self._exec(cmd, str(input_path))
 

@@ -31,6 +31,12 @@ def main() -> None:
         '--timeout', type=int, default=600,
         help='OCR timeout in seconds (default: 600)',
     )
+    parser.add_argument(
+        '--engine', default='auto',
+        choices=['auto', 'odl', 'mineru', 'pymupdf'],
+        help='PDF engine (default: auto). auto: pymupdf text extraction + MinerU OCR fallback; '
+             'odl: OpenDataLoader PDF; mineru: force MinerU OCR; pymupdf: text extraction only',
+    )
 
     args = parser.parse_args()
 
@@ -50,17 +56,17 @@ def main() -> None:
     pdf_kwargs = {'lang': args.lang, 'dpi': args.dpi, 'timeout': args.timeout}
 
     if len(paths) == 1:
-        _convert_single(paths[0], args.output, pdf_kwargs)
+        _convert_single(paths[0], args.output, pdf_kwargs, args.engine)
     else:
-        _convert_batch(paths, args.output, pdf_kwargs)
+        _convert_batch(paths, args.output, pdf_kwargs, args.engine)
 
 
-def _convert_single(input_path: str, output: str | None, pdf_kwargs: dict) -> None:
+def _convert_single(input_path: str, output: str | None, pdf_kwargs: dict, engine: str = 'auto') -> None:
     if output is None:
         output = str(Path(input_path).with_suffix('.md'))
 
     try:
-        result = convert(input_path, **pdf_kwargs)
+        result = convert(input_path, engine=engine, **pdf_kwargs)
     except UnsupportedFormatError as e:
         print(str(e), file=sys.stderr)
         sys.exit(1)
@@ -72,14 +78,14 @@ def _convert_single(input_path: str, output: str | None, pdf_kwargs: dict) -> No
     print(str(output))
 
 
-def _convert_batch(paths: list[str], output_dir: str | None, pdf_kwargs: dict) -> None:
+def _convert_batch(paths: list[str], output_dir: str | None, pdf_kwargs: dict, engine: str = 'auto') -> None:
     if output_dir:
         outdir = Path(output_dir)
         outdir.mkdir(parents=True, exist_ok=True)
     else:
         outdir = None
 
-    batch = convert_batch(paths, **pdf_kwargs)
+    batch = convert_batch(paths, engine=engine, **pdf_kwargs)
 
     for r in batch.results:
         if outdir:

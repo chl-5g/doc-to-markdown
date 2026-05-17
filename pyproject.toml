@@ -14,6 +14,7 @@ dependencies = [
 
 [project.optional-dependencies]
 pdf = ["mineru[all]"]
+odl = ["opendataloader-pdf"]
 
 [project.scripts]
 doc2md = "doc2md.cli:main"
